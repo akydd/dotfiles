@@ -1,3 +1,3 @@
 # dotfiles
 
-My dotfiles for nvim, tmux, etc...
+My dotfiles for nvim, tmux, etc.
