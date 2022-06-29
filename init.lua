@@ -47,9 +47,25 @@ vim.api.nvim_set_keymap('n', '[d', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>'
 vim.api.nvim_set_keymap('n', ']d', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', lspopts)
 vim.api.nvim_set_keymap('n', '<space>q', '<cmd>lua vim.diagnostic.setloclist()<CR>', lspopts)
 
+-- autocommand group for lsp formatting
+local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
+
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
 local on_attach = function(client, bufnr)
+    -- save on format, if supported
+    if client.supports_method("textDocument/formatting") then
+        vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
+        vim.api.nvim_create_autocmd("BufWritePre", {
+            group = augroup,
+            buffer = bufnr,
+            callback = function()
+                -- on 0.8, you should use vim.lsp.buf.format({ bufnr = bufnr }) instead
+                vim.lsp.buf.formatting_sync()
+            end,
+        })
+    end
+
   local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
   --local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
 
@@ -86,7 +102,7 @@ for _, lsp in ipairs(servers) do
   }
 end
 
--- autoformat and sort imports for go on save
+-- sort imports for go on save
 --
 function OrgImports(wait_ms)
     local params = vim.lsp.util.make_range_params()
@@ -104,7 +120,6 @@ function OrgImports(wait_ms)
 end
 
 cmd 'autocmd BufWritePre *.go lua OrgImports(1000)'
-cmd 'autocmd BufWritePre *.go lua vim.lsp.buf.formatting_sync(nil, 1000)'
 
 -- Tmux
 --
