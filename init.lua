@@ -36,7 +36,7 @@ g.ale_linters = {
     javascript = 'eslint',
 }
 
--- lsp, currently for golang only
+-- lsp
 --
 local nvim_lsp = require 'lspconfig'
 
@@ -91,7 +91,7 @@ local on_attach = function(client, bufnr)
   buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', lspopts)
 end
 
-local servers = { 'gopls', 'eslint', 'ccls' }
+local servers = { 'gopls', 'eslint', 'ccls', 'pylsp' }
 for _, lsp in ipairs(servers) do
   nvim_lsp[lsp].setup {
     capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities()),
