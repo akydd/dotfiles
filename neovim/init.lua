@@ -53,7 +53,7 @@ local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
 local on_attach = function(client, bufnr)
-    -- save on format, if supported
+    -- format on save, if supported
     if client.supports_method("textDocument/formatting") then
         vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
         vim.api.nvim_create_autocmd("BufWritePre", {
@@ -65,6 +65,29 @@ local on_attach = function(client, bufnr)
             end,
         })
     end
+
+    -- organize imports, for go only
+    vim.api.nvim_create_autocmd("BufWritePre", {
+        group = augroup,
+        buffer = bufnr,
+        -- pattern = { "*.go" },
+        callback = function()
+            local params = vim.lsp.util.make_range_params(nil, vim.lsp.util._get_offset_encoding())
+            params.context = {only = {"source.organizeImports"}}
+
+            local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 3000)
+            for _, res in pairs(result or {}) do
+                for _, r in pairs(res.result or {}) do
+                    if r.edit then
+                        vim.lsp.util.apply_workspace_edit(r.edit, vim.lsp.util._get_offset_encoding())
+                    else
+                        vim.lsp.buf.execute_command(r.command)
+                    end
+                end
+            end
+        end,
+    })
+
 
   local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
   --local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
@@ -119,7 +142,6 @@ function OrgImports(wait_ms)
     end 
 end
 
-cmd 'autocmd BufWritePre *.go lua OrgImports(1000)'
 
 -- Tmux
 --

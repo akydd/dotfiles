@@ -30,18 +30,19 @@ require "paq" {
     "L3MON4D3/LuaSnip";
     "saadparwaiz1/cmp_luasnip";
 
-    -- telescope
+    -- telescope + fzf
     "nvim-lua/plenary.nvim";
     "nvim-lua/popup.nvim";
     "nvim-telescope/telescope.nvim";
     {"nvim-telescope/telescope-fzf-native.nvim", run = 'make'};
-    "nathom/tmux.nvim";
-
-    "dense-analysis/ale";
 
     "machakann/vim-sandwich";
 
     -- tmux window switching
     "nathom/tmux.nvim";
+
+    -- git
+    "sindrets/diffview.nvim";
+    "TimUntersberger/neogit";
 }
 
