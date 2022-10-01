@@ -25,6 +25,8 @@ require('options')
 require('ts') -- telescope
 require('snippets')
 require('autocomplete')
+require('git')
+require('tm') -- tmux
 
 -- quick reload of snippets
 vim.keymap.set("n", "<leader><leader>s", "<cmd>source ~/.config/nvim/lua/snippets.lua<CR>")
@@ -42,10 +44,40 @@ local nvim_lsp = require 'lspconfig'
 
 -- diagnostics
 local lspopts = { noremap=true, silent=true }
-vim.api.nvim_set_keymap('n', '<space>e', '<cmd>lua vim.diagnostic.open_float()<CR>', lspopts)
-vim.api.nvim_set_keymap('n', '[d', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', lspopts)
-vim.api.nvim_set_keymap('n', ']d', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', lspopts)
-vim.api.nvim_set_keymap('n', '<space>q', '<cmd>lua vim.diagnostic.setloclist()<CR>', lspopts)
+
+vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, lspopts)
+vim.keymap.set("n", "<leader>pe", vim.lsp.diagnostic.goto_prev, lspopts)
+vim.keymap.set("n", "<leader>ne", vim.lsp.diagnostic.goto_next, lspopts)
+vim.keymap.set("n", "<leader>q", vim.diagnostic.setqflist, lspopts)
+
+-- disable virtual_text (inline) diagnostics and use floating window
+-- format the message such that it shows source, message and
+-- the error code. Show the message with <space>e
+vim.diagnostic.config({
+	virtual_text = false,
+	signs = true,
+	float = {
+		border = "single",
+		format = function(diagnostic)
+			return string.format(
+				"%s (%s) [%s]",
+				diagnostic.message,
+				diagnostic.source,
+				diagnostic.code or diagnostic.user_data.lsp.code
+			)
+		end,
+	},
+})
+
+-- update the quickfix list with up-to-date diagnostic info
+vim.api.nvim_create_augroup('diagnostics', { clear = true })
+
+  vim.api.nvim_create_autocmd('DiagnosticChanged', {
+    group = 'diagnostics',
+    callback = function(args)
+      vim.diagnostic.setqflist({ open = false })
+    end,
+  })
 
 -- autocommand group for lsp formatting
 local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
@@ -89,29 +121,29 @@ local on_attach = function(client, bufnr)
     })
 
 
-  local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
-  --local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+    local lspbufopts = { noremap=true, silent=true, buffer=bufnr }
 
-  -- Enable completion triggered by <c-x><c-o>
-  -- buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
+    -- Enable completion triggered by <c-x><c-o>
+    -- local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+    -- buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
 
-  -- Mappings.
+    -- Mappings.
 
-  -- See `:help vim.lsp.*` for documentation on any of the below functions
-  buf_set_keymap('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', lspopts)
-  buf_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', lspopts)
-  buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', lspopts)
-  buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', lspopts)
-  buf_set_keymap('n', 'gn', '<cmd>lua vim.lsp.buf.rename()<CR>', lspopts)
-  buf_set_keymap('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', lspopts)
-  buf_set_keymap('n', 'gk', '<cmd>lua vim.lsp.buf.signature_help()<CR>', lspopts)
-  buf_set_keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', lspopts)
-  buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', lspopts)
-  buf_set_keymap('n', '<space>f', '<cmd>lua vim.lsp.buf.formatting()<CR>', lspopts)
+    -- See `:help vim.lsp.*` for documentation on any of the below functions
+    vim.keymap.set("n", "gD", vim.lsp.buf.declaration, lspopts)
+    vim.keymap.set("n", "gd", vim.lsp.buf.definition, lspopts)
+    vim.keymap.set("n", "gi", vim.lsp.buf.implementation, lspopts)
+    vim.keymap.set("n", "gr", vim.lsp.buf.references, lspbufopts)
+    vim.keymap.set("n", "gn", vim.lsp.buf.rename, lspbufopts)
+    vim.keymap.set("n", "K", vim.lsp.buf.hover, lspbufopts)
+    vim.keymap.set("n", "gk", vim.lsp.buf.signature_help, lspbufopts)
+    --vim.keymap.set("n", "<space>D", vim.lsp.buf.type_definition, lspbufopts)
+    vim.keymap.set("n", "<space>ca", vim.lsp.buf.code_action, lspbufopts)
+    vim.keymap.set("n", "<space>f", vim.lsp.buf.formatting, lspbufopts)
 
-  buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', lspopts)
-  buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', lspopts)
-  buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', lspopts)
+    vim.keymap.set("n", "<space>wa", vim.lsp.buf.add_workspace_folder, lspbufopts)
+    vim.keymap.set("n", "<space>wr", vim.lsp.buf.remove_workspace_folder, lspbufopts)
+    vim.keymap.set("n", "<space>wl", vim.inspect(vim.lsp.buf.list_workspace_folders), lspbufopts)
 end
 
 local servers = { 'gopls', 'eslint', 'ccls', 'pylsp' }
@@ -141,13 +173,3 @@ function OrgImports(wait_ms)
       end
     end 
 end
-
-
--- Tmux
---
-local opts = { noremap=true, silent=true }
-local map = vim.api.nvim_set_keymap
-nmap{"<C-h>", [[<cmd>lua require('tmux').move_left()<cr>]], opts}
-nmap{"<C-j>", [[<cmd>lua require('tmux').move_down()<cr>]], opts}
-nmap{"<C-k>", [[<cmd>lua require('tmux').move_up()<cr>]], opts}
-nmap{"<C-l>", [[<cmd>lua require('tmux').move_right()<cr>]], opts}

@@ -1,15 +1,3 @@
--- Helper functions
---
-local nmap = function(key)
-  -- get the extra options
-  local opts = {noremap = true}
-  for i, v in pairs(key) do
-    if type(i) == 'string' then opts[i] = v end
-  end
-
-  vim.api.nvim_set_keymap("n", key[1], key[2], opts)
-end
-
 -- telescope
 --
 require('telescope').setup {
@@ -35,16 +23,16 @@ require('telescope').setup {
 
 require('telescope').load_extension('fzf')
 
+local tb = require 'telescope.builtin'
 -- Find files
-nmap{"<leader>o", ":lua require('telescope.builtin').find_files()<CR>", opts}
+vim.keymap.set("n", "<leader>o", tb.find_files, opts)
 -- Grep string under cursor
-nmap{"<leader>s", ":lua require('telescope.builtin').grep_string()<CR>", opts}
+vim.keymap.set("n", "<leader>s", tb.grep_string, opts)
 -- Live grep files
-nmap{"<leader>r", ":lua require('telescope.builtin').live_grep()<CR>", opts}
+vim.keymap.set("n", "<leader>r", tb.live_grep, opts)
 -- List buffers
-nmap{"<leader>b", ":lua require('telescope.builtin').buffers()<CR>", opts}
+vim.keymap.set("n", "<leader>b", tb.buffers, opts)
 -- Pick git branch
-nmap{"<leader>gb", ":lua require('telescope.builtin').git_branches()<CR>", opts}
+vim.keymap.set("n", "<leader>gb", tb.git_branches, opts)
 -- symbols
-nmap{"<leader>t", ":lua require('telescope.builtin').lsp_document_symbols()<CR>", opts}
-
+vim.keymap.set("n", "<leader>t", tb.lsp_document_symbols, opts)
