@@ -26,7 +26,7 @@ require('ts') -- telescope
 require('snippets')
 require('autocomplete')
 require('git')
-require('tm') -- tmux
+require('tm')
 
 -- quick reload of snippets
 vim.keymap.set("n", "<leader><leader>s", "<cmd>source ~/.config/nvim/lua/snippets.lua<CR>")
@@ -46,8 +46,8 @@ local nvim_lsp = require 'lspconfig'
 local lspopts = { noremap=true, silent=true }
 
 vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, lspopts)
-vim.keymap.set("n", "<leader>pe", vim.lsp.diagnostic.goto_prev, lspopts)
-vim.keymap.set("n", "<leader>ne", vim.lsp.diagnostic.goto_next, lspopts)
+vim.keymap.set("n", "<leader>pe", vim.diagnostic.goto_prev, lspopts)
+vim.keymap.set("n", "<leader>ne", vim.diagnostic.goto_next, lspopts)
 vim.keymap.set("n", "<leader>q", vim.diagnostic.setqflist, lspopts)
 
 -- disable virtual_text (inline) diagnostics and use floating window

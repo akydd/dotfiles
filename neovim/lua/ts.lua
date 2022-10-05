@@ -22,8 +22,11 @@ require('telescope').setup {
 }
 
 require('telescope').load_extension('fzf')
+require('telescope').load_extension('file_browser')
+
 
 local tb = require 'telescope.builtin'
+local te = require 'telescope'.extensions
 -- Find files
 vim.keymap.set("n", "<leader>o", tb.find_files, opts)
 -- Grep string under cursor
@@ -36,3 +39,6 @@ vim.keymap.set("n", "<leader>b", tb.buffers, opts)
 vim.keymap.set("n", "<leader>gb", tb.git_branches, opts)
 -- symbols
 vim.keymap.set("n", "<leader>t", tb.lsp_document_symbols, opts)
+-- file explorer
+vim.keymap.set("n", "<leader>fb", ":Telescope file_browser<cr>", opts)
+-- vim.keymap.set("n", "<leader>f", te.file_browser.file_browser, opts)

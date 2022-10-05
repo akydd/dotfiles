@@ -12,3 +12,4 @@ opt.cindent = true
 opt.relativenumber = true
 opt.number = true
 opt.ignorecase = true
+opt.filetype = 'on'

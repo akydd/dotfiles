@@ -35,6 +35,7 @@ require "paq" {
     "nvim-lua/popup.nvim";
     "nvim-telescope/telescope.nvim";
     {"nvim-telescope/telescope-fzf-native.nvim", run = 'make'};
+    "nvim-telescope/telescope-file-browser.nvim";
 
     "machakann/vim-sandwich";
 
